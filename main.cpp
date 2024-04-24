@@ -2,7 +2,7 @@
 int
 main()
 {
-    MJPEGWriter test(7777);
+    MJPEGWriter test(8081);
 
     VideoCapture cap;
     bool ok = cap.open(0);
@@ -16,7 +16,15 @@ main()
     test.write(frame);
     frame.release();
     test.start();
-    while(cap.isOpened()){cap >> frame; test.write(frame); frame.release();}
+    int ster = -1;
+    while(cap.isOpened() /*&& ster==-1*/){
+      cap >> frame; 
+      test.write(frame); 
+      //imshow("frame", frame);
+      frame.release();
+      //ster = waitKey(1);
+    }
+    
     test.stop();
     exit(0);
 

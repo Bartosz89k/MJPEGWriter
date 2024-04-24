@@ -22,16 +22,16 @@ MJPEGWriter::Listener()
         rread = master;
         struct timeval to = { 0, timeout };
         maxfd = sock + 1;
-        if (sock == INVALID_SOCKET){
-        	return;
-        }
+
         int sel = select(maxfd, &rread, NULL, NULL, &to);
         if (sel > 0) {
             for (int s = 0; s < maxfd; s++)
             {
                 if (FD_ISSET(s, &rread) && s == sock)
                 {
-                    int         addrlen = sizeof(SOCKADDR);
+                    std::time_t t = std::time(0); // get time now
+		    std::tm* now = std::localtime(&t);
+		    int         addrlen = sizeof(SOCKADDR);
                     SOCKADDR_IN address = { 0 };
                     SOCKET      client = accept(sock, (SOCKADDR*)&address, (socklen_t*)&addrlen);
                     if (client == SOCKET_ERROR)
@@ -41,10 +41,26 @@ MJPEGWriter::Listener()
                     }
                     maxfd = (maxfd>client ? maxfd : client);
                     pthread_mutex_lock(&mutex_cout);
-                    cout << "new client " << client << endl;
+                    cout << "new client " << client << endl; // << "address" << address.in_addr.s_addr << endl;
                     char headers[4096] = "\0";
                     int readBytes = _read(client, headers);
                     cout << headers;
+		    cout << "IP: " << endl;
+		    char *ip = inet_ntoa(address.sin_addr);
+		    cout << ip << endl;
+		    
+		    cout << "TIME: " << endl;
+ 
+		    std::cout << std::setfill('0') << std::setw(2) << (now->tm_year + 1900) << '-';
+		    std::cout << std::setfill('0') << std::setw(2) << (now->tm_mon + 1) << '-';
+		    std::cout << std::setfill('0') << std::setw(2) << now->tm_mday << std::endl ;
+		    
+		    std::cout << std::setfill('0') << std::setw(2) << now->tm_hour  << ':';
+		    std::cout << std::setfill('0') << std::setw(2) << now->tm_min << ':';
+		    std::cout << std::setfill('0') << std::setw(2) << now->tm_sec << std::endl ;
+ 
+
+		    
                     pthread_mutex_unlock(&mutex_cout);
                     pthread_mutex_lock(&mutex_client);
                     _write(client, header_data, header_size);

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <iomanip>
+#include <ctime>
 #include "opencv2/opencv.hpp"
 
 using namespace cv;
@@ -162,9 +164,15 @@ public:
     }
 
     void stop(){
+	cout << "release" << endl;
+	
     	this->release();
         pthread_join(thread_listen, NULL);
+	cout << "pthread_join(thread_listen, NULL);" << endl;
+      
         pthread_join(thread_write, NULL);
+	cout << "release_finished" << endl;
+	
     }
 
     void write(Mat frame){
